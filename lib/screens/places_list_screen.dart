@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:greate_places_app/providers/great_places.dart';
 import 'package:greate_places_app/screens/add_place_screen.dart';
@@ -19,28 +21,39 @@ class PlacesListScreen extends StatelessWidget {
               icon: const Icon(Icons.add))
         ],
       ),
-      body: Consumer<GreatPlaces>(
-        child: const Center(
-          child: Text(
-            'get no places yet, start adding some!',
-          ),
-        ),
-        builder: (context, greatPlace, ch) {
-          return greatPlace.items.isEmpty
-              ? ch!
-              : ListView.builder(
-                  itemBuilder: (ctx, i) => ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: FileImage(greatPlace.items[i].image!),
+      body: FutureBuilder(
+        future: Provider.of<GreatPlaces>(context, listen: false)
+            .fetchAndSetPlaces(),
+        // ignore: prefer_const_constructors
+        builder: (ctx, snapshot) =>
+            snapshot.connectionState == ConnectionState.waiting
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : Consumer<GreatPlaces>(
+                    child: const Center(
+                      child: Text(
+                        'get no places yet, start adding some!',
+                      ),
                     ),
-                    title: Text(greatPlace.items[i].title!),
-                    onTap: () {
-                      // go to Detail page....
+                    builder: (context, greatPlace, ch) {
+                      return greatPlace.items.isEmpty
+                          ? ch!
+                          : ListView.builder(
+                              itemBuilder: (ctx, i) => ListTile(
+                                leading: CircleAvatar(
+                                  backgroundImage:
+                                      FileImage(greatPlace.items[i].image!),
+                                ),
+                                title: Text(greatPlace.items[i].title!),
+                                onTap: () {
+                                  // go to Detail page....
+                                },
+                              ),
+                              itemCount: greatPlace.items.length,
+                            );
                     },
                   ),
-                  itemCount: greatPlace.items.length,
-                );
-        },
       ),
     );
   }
